@@ -1,0 +1,108 @@
+# =============================================================================
+# `.gitignore` for `asynchronous-release-telemetry-engine`
+#
+# Purpose : keep local noise out of the repository and protect the canonical
+#           tree defined in `README.md` Section 7.
+# Pattern : general ignores first, then two allow-lists (`data/` and `assets/`)
+#           where an accidental commit could leak real or personal content.
+# Note    : an ignored file can still be committed deliberately with
+#           `git add -f <path>`. Use that only after reading Section 6 and 7.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# 1. `Python` bytecode and tool caches
+#    `src/triage_parser.py` is standard-library only, so caches appear only
+#    when tools or other scripts import it.
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.coverage
+htmlcov/
+
+
+# -----------------------------------------------------------------------------
+# 2. Virtual and `conda` environments
+#    The documented environment `telemetry-engine` is created by `conda` outside
+#    this folder. These entries cover environments created inside it.
+# -----------------------------------------------------------------------------
+.venv/
+venv/
+env/
+.conda/
+*.egg-info/
+build/
+dist/
+
+
+# -----------------------------------------------------------------------------
+# 3. Workspace configuration overrides
+#    `VS Code` stores the selected interpreter and local settings in `.vscode/`;
+#    these are machine-specific and are not part of the deliverable.
+# -----------------------------------------------------------------------------
+.vscode/
+.idea/
+*.code-workspace
+
+
+# -----------------------------------------------------------------------------
+# 4. Operating-system files
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+
+# -----------------------------------------------------------------------------
+# 5. Scratch files and processing artifacts
+# -----------------------------------------------------------------------------
+*.log
+*.tmp
+*.bak
+*.orig
+*.swp
+*~
+
+
+# -----------------------------------------------------------------------------
+# 6. DATA GUARD (privacy boundary, `README.md` Section 11)
+#    Only the two canonical data files are tracked. Anything else placed in
+#    these folders, including a real feedback export, stays local.
+#    The folders themselves are not ignored, so the allow-list entries work.
+# -----------------------------------------------------------------------------
+data/raw/*
+!data/raw/feedback_export_sample.json
+
+data/processed/*
+!data/processed/triaged_feedback.csv
+
+
+# -----------------------------------------------------------------------------
+# 7. EVIDENCE GUARD (`README.md` Section 10)
+#    Only the four named screenshots are tracked. Screenshots of
+#    `Jira Product Discovery` and `Confluence` can show account names, email
+#    addresses, and site addresses. Redact them, name them exactly as below,
+#    and the allow-list will pick them up.
+# -----------------------------------------------------------------------------
+assets/*
+!assets/jpd_matrix_view.png
+!assets/jpd_list_view.png
+!assets/confluence_prd_page.png
+!assets/parser_run.png
+
+
+# -----------------------------------------------------------------------------
+# 8. Secrets guard
+#    No credentials are used by this repository. These entries protect against
+#    a future `Atlassian` API token or key being committed by accident.
+# -----------------------------------------------------------------------------
+.env
+.env.*
+*.pem
+*.key
