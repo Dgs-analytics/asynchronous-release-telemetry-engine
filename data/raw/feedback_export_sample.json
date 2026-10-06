@@ -1,0 +1,406 @@
+{
+  "export_meta": {
+    "export_id": "SYNTHETIC-EXPORT-001",
+    "is_synthetic": true,
+    "description": "Fabricated post-release feedback export for the asynchronous-release-telemetry-engine repository. No real platform, user, or incident.",
+    "schema_version": "1.0",
+    "total_records": 34,
+    "channel_counts": {
+      "slack": 16,
+      "email": 10,
+      "support_form": 8
+    }
+  },
+  "channels": {
+    "slack": [
+      {
+        "msg_id": "R01",
+        "ts": "1789373520.000100",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U01A7XQ2"
+        },
+        "payload": {
+          "text": "wallet balance not updating after transfer confirmed. sent 40 TKN, tx 0x7a91c2d4e5f6 shows confirmed but balance is the old number an hour later"
+        }
+      },
+      {
+        "msg_id": "R04",
+        "ts": "1789378860.000400",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U02B8YR3"
+        },
+        "payload": {
+          "text": "Wallet balance not updating after transfer confirmed!! same here, tx 0x9c0d71aa55e3"
+        }
+      },
+      {
+        "msg_id": "R06",
+        "ts": "1789387320.000600",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U03C9ZS4"
+        },
+        "payload": {
+          "text": "Wallet balance not updating after transfer confirmed. Anyone else? Balance stuck since the release."
+        }
+      },
+      {
+        "msg_id": "R08",
+        "ts": "1789407000.000800",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U04D0AT5"
+        },
+        "payload": {
+          "text": "Wallet balance not updating after transfer confirmed. tx 0x77ae0c5d91b4, confirmed on chain for me too."
+        }
+      },
+      {
+        "msg_id": "R10",
+        "ts": "1789453500.001000",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U01A7XQ2"
+        },
+        "payload": {
+          "text": "Wallet balance not updating after transfer confirmed. Still broken this morning, tx 0xe12fb8830c4d"
+        }
+      },
+      {
+        "msg_id": "R13",
+        "ts": "1789490400.001300",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U05E1BU6"
+        },
+        "payload": {
+          "text": "Wallet balance not updating after transfer confirmed. Confirmed transfer, old balance still displayed."
+        }
+      },
+      {
+        "msg_id": "R14",
+        "ts": "1789375200.001400",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U06F2CV7"
+        },
+        "payload": {
+          "text": "Transaction failed: execution reverted (gas estimation failed)"
+        }
+      },
+      {
+        "msg_id": "R15",
+        "ts": "1789380900.001500",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U07G3DW8"
+        },
+        "payload": {
+          "text": "Transaction failed: execution reverted (gas estimation failed) 0x91ab33cc77d0"
+        }
+      },
+      {
+        "msg_id": "R18",
+        "ts": "1789458300.001800",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U06F2CV7"
+        },
+        "payload": {
+          "text": "Transaction failed: execution reverted (gas estimation failed). Tried again, same result."
+        }
+      },
+      {
+        "msg_id": "R20",
+        "ts": "1789470300.002000",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U08H4EX9"
+        },
+        "payload": {
+          "text": "Transaction failed: execution reverted (gas estimation failed)"
+        }
+      },
+      {
+        "msg_id": "R21",
+        "ts": "1789379700.002100",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U09J5FY0"
+        },
+        "payload": {
+          "text": "Swap keeps failing with out of gas error. Retried twice."
+        }
+      },
+      {
+        "msg_id": "R24",
+        "ts": "1789480200.002400",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U10K6GZ1"
+        },
+        "payload": {
+          "text": "Swap keeps failing with out of gas error"
+        }
+      },
+      {
+        "msg_id": "R25",
+        "ts": "1789381800.002500",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U11L7HA2"
+        },
+        "payload": {
+          "text": "Portfolio page failed to load: 502 bad gateway"
+        }
+      },
+      {
+        "msg_id": "R27",
+        "ts": "1789384200.002700",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U11L7HA2"
+        },
+        "payload": {
+          "text": "portfolio page failed to load - bad gateway 502"
+        }
+      },
+      {
+        "msg_id": "R29",
+        "ts": "1789388400.002900",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U12M8IB3"
+        },
+        "payload": {
+          "text": "Send button label is misaligned on mobile. Screenshot attached."
+        }
+      },
+      {
+        "msg_id": "R33",
+        "ts": "1789459500.003300",
+        "channel": "#release-feedback",
+        "user": {
+          "id": "U13N9JC4"
+        },
+        "payload": {
+          "text": "App feels slow after the update. Pages take a while to open."
+        }
+      }
+    ],
+    "email": [
+      {
+        "message_id": "R02",
+        "received_at": "2026-09-14T09:05:00Z",
+        "to": "feedback@example.test",
+        "from": {
+          "address": "reporter-a1@example.test"
+        },
+        "subject": "Problem report",
+        "body": {
+          "plain": "Wallet balance not updating after transfer confirmed\n\nHi team, my transfer of 120 TKN (tx 0x3be4d19f0a22) confirmed at 08:50 but the wallet still shows the previous balance. Refreshing does nothing."
+        }
+      },
+      {
+        "message_id": "R05",
+        "received_at": "2026-09-14T11:18:00Z",
+        "to": "feedback@example.test",
+        "from": {
+          "address": "reporter-b2@example.test"
+        },
+        "subject": "Problem report",
+        "body": {
+          "plain": "wallet balance not updating after transfer confirmed (tx 0x51f8a2c07b19)\nSent 300 TKN yesterday evening."
+        }
+      },
+      {
+        "message_id": "R09",
+        "received_at": "2026-09-14T21:10:00Z",
+        "to": "feedback@example.test",
+        "from": {
+          "address": "reporter-c3@example.test"
+        },
+        "subject": "Problem report",
+        "body": {
+          "plain": "Wallet balance not updating after transfer confirmed\n\nTransfer 0xd4410be2a7c9 is confirmed but my balance has not moved."
+        }
+      },
+      {
+        "message_id": "R12",
+        "received_at": "2026-09-15T09:30:00Z",
+        "to": "feedback@example.test",
+        "from": {
+          "address": "reporter-a1@example.test"
+        },
+        "subject": "Problem report",
+        "body": {
+          "plain": "Wallet balance not updating after transfer confirmed. Following up on my earlier email, still wrong."
+        }
+      },
+      {
+        "message_id": "R16",
+        "received_at": "2026-09-14T13:05:00Z",
+        "to": "feedback@example.test",
+        "from": {
+          "address": "reporter-d4@example.test"
+        },
+        "subject": "Problem report",
+        "body": {
+          "plain": "Transaction failed: execution reverted (gas estimation failed)\n\nTrying to stake 500 TKN and it fails every time."
+        }
+      },
+      {
+        "message_id": "R19",
+        "received_at": "2026-09-15T09:10:00Z",
+        "to": "feedback@example.test",
+        "from": {
+          "address": "reporter-e5@example.test"
+        },
+        "subject": "Problem report",
+        "body": {
+          "plain": "Transaction failed: execution reverted (gas estimation failed)\n\nThree attempts, three failures."
+        }
+      },
+      {
+        "message_id": "R22",
+        "received_at": "2026-09-14T14:40:00Z",
+        "to": "feedback@example.test",
+        "from": {
+          "address": "reporter-f6@example.test"
+        },
+        "subject": "Problem report",
+        "body": {
+          "plain": "Swap keeps failing with out of gas error\n\nGas limit looks fine to me."
+        }
+      },
+      {
+        "message_id": "R26",
+        "received_at": "2026-09-14T10:52:00Z",
+        "to": "feedback@example.test",
+        "from": {
+          "address": "reporter-g7@example.test"
+        },
+        "subject": "Problem report",
+        "body": {
+          "plain": "Portfolio page failed to load: 504 bad gateway\n\nHappened twice in a row."
+        }
+      },
+      {
+        "message_id": "R31",
+        "received_at": "2026-09-14T18:05:00Z",
+        "to": "feedback@example.test",
+        "from": {
+          "address": "reporter-h8@example.test"
+        },
+        "subject": "Problem report",
+        "body": {
+          "plain": "Typo in the settings page header\n\nIt says 'Setings'."
+        }
+      },
+      {
+        "message_id": "R34",
+        "received_at": "2026-09-15T12:45:00Z",
+        "to": "feedback@example.test",
+        "from": {
+          "address": "reporter-i9@example.test"
+        },
+        "subject": "Problem report",
+        "body": {
+          "plain": "App feels slow after the update\n\nEverything lags since Monday."
+        }
+      }
+    ],
+    "support_form": [
+      {
+        "ticket_id": "R03",
+        "submitted_at": "2026-09-14T14:30:00+05:30",
+        "category": "Bug report",
+        "reporter": {
+          "ref": "SF-1042"
+        },
+        "fields": {
+          "description": "Wallet balance not updating after transfer confirmed. I transferred 15.5 TKN and it says confirmed, my balance did not change."
+        }
+      },
+      {
+        "ticket_id": "R07",
+        "submitted_at": "2026-09-14T20:45:00+05:30",
+        "category": "Bug report",
+        "reporter": {
+          "ref": "SF-1049"
+        },
+        "fields": {
+          "description": "Wallet balance not updating after transfer confirmed. Transfer of 75 TKN confirmed, wallet shows the old amount."
+        }
+      },
+      {
+        "ticket_id": "R11",
+        "submitted_at": "2026-09-15T10:20:00+05:30",
+        "category": "Bug report",
+        "reporter": {
+          "ref": "SF-1063"
+        },
+        "fields": {
+          "description": "Wallet balance not updating after transfer confirmed. Sent 8 TKN last night, confirmed, balance unchanged."
+        }
+      },
+      {
+        "ticket_id": "R17",
+        "submitted_at": "2026-09-14T13:20:00-04:00",
+        "category": "Bug report",
+        "reporter": {
+          "ref": "SF-1051"
+        },
+        "fields": {
+          "description": "Transaction failed: execution reverted (gas estimation failed). Happens on every attempt to withdraw."
+        }
+      },
+      {
+        "ticket_id": "R23",
+        "submitted_at": "2026-09-15T09:30:00+01:00",
+        "category": "Bug report",
+        "reporter": {
+          "ref": "SF-1058"
+        },
+        "fields": {
+          "description": "Swap keeps failing with out of gas error. Cannot complete any swap since the update."
+        }
+      },
+      {
+        "ticket_id": "R28",
+        "submitted_at": "2026-09-14T17:05:00+05:30",
+        "category": "Bug report",
+        "reporter": {
+          "ref": "SF-1044"
+        },
+        "fields": {
+          "description": "Portfolio page failed to load: bad gateway. Works after a few minutes."
+        }
+      },
+      {
+        "ticket_id": "R30",
+        "submitted_at": "2026-09-15T10:45:00+05:30",
+        "category": "Bug report",
+        "reporter": {
+          "ref": "SF-1061"
+        },
+        "fields": {
+          "description": "Send button label is misaligned on mobile. Looks cut off on my phone."
+        }
+      },
+      {
+        "ticket_id": "R32",
+        "submitted_at": "2026-09-14T22:25:00+05:30",
+        "category": "Bug report",
+        "reporter": {
+          "ref": "SF-1047"
+        },
+        "fields": {
+          "description": "Double charged for one transfer. I was charged 25 TKN twice for a single transfer, please refund."
+        }
+      }
+    ]
+  }
+}
