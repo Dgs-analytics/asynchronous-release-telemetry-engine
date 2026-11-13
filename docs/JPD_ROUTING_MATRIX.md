@@ -1,10 +1,10 @@
 # `JPD_ROUTING_MATRIX.md`
 
-> The exact configuration of the ticket-routing dashboard in `Jira Product Discovery`: custom fields, `CSV` import map, routing rules, views, and automation rules sized to the Free plan's 200-run monthly quota.
+> The exact configuration of the ticket-routing dashboard in `Jira Product Discovery`: custom fields, `CSV` import map, routing rules, views, and two automation flows, with the usage the author observed while testing them.
 
 > 🧪 **[SYNTHETIC DATA NOTICE]**: This guide configures a workspace for fabricated data. No real product, user, or incident is represented.
 
-> 🧭 **[VERIFICATION STATUS]**: Plan limits, field types, formula syntax, matrix-view behavior, the import entry point, and automation usage rules were checked against Atlassian documentation in October 2026. Menu labels inside the import wizard and the automation builder were **not** visible to the author and may differ; each such step is marked **[CONFIRM ON SCREEN]**. Atlassian changes interface wording without notice.
+> 🧭 **[VERIFICATION STATUS]**: Field types, formula syntax, matrix-view behavior, and the import entry point were checked against Atlassian documentation in October 2026. In November 2026 the author built the space, the four views, and both automation flows on screen, and tested each flow with one positive and one negative case (Section 8.4). Where the observed behavior differed from the documentation or from an earlier draft of this guide, this guide records what was observed. Steps still marked **[CONFIRM ON SCREEN]** were not re-checked. Atlassian changes interface wording without notice.
 
 ---
 
@@ -19,7 +19,7 @@
 | 5 | `CSV` Import Map |
 | 6 | Routing Matrix Rules |
 | 7 | View Specifications |
-| 8 | Automation Rules and Quota Budget |
+| 8 | Automation Flows and Observed Usage |
 | 9 | Operating Procedure |
 | 10 | Verification Checklist |
 | 11 | Limitations and Operational Traps |
@@ -32,8 +32,8 @@
 | # | Principle | Consequence |
 |:---:|:---|:---|
 | 1 | **Routing is declarative.** Ideas appear in queues because a saved view filters on `Routing Queue`. | Routing consumes **zero** automation runs. |
-| 2 | **Fields arrive through the `CSV` import, never through automation.** | An automation rule that fires on idea creation would spend one run per imported idea. This design has no such rule. |
-| 3 | **Automation is reserved for human-initiated events**: a manual re-banding and a requirements-page link being added. | Monthly run volume is bounded by analyst activity, not by data volume. |
+| 2 | **Fields arrive through the `CSV` import, never through automation.** | An automation flow that fires on idea creation would run once per imported idea. This design has no such flow. |
+| 3 | **Automation is reserved for human-initiated events**: a manual re-banding and a requirements-page link being added. | Run volume is bounded by analyst activity, not by data volume. |
 | 4 | **Every computed value is auditable.** The parser computes `Triage Score`; a `Jira Product Discovery` formula recomputes it independently. | A mapping error shows up as a mismatch. |
 | 5 | **Every routing rule has an integrity filter** that must return zero ideas. | The dashboard proves its own correctness. |
 
@@ -44,11 +44,11 @@
 | Item | Limit or Requirement | Source |
 |:---|:---|:---|
 | Creators | 3 on the Free plan; a fourth moves the site onto a Standard plan trial | Atlassian pricing page |
-| Automation | 200 rule runs per month on the Free plan | Atlassian pricing page, automation usage documentation |
-| What counts as a run | A rule run counts only if the rule performs at least one action, and counts once however many actions it performs | Atlassian usage documentation |
+| Automation usage | The usage screen reports **runs**, **steps**, and **credits**, and labels the figures *Estimate*. On the Free-plan site used for this build (November 2026) it showed no limit figure. A figure of 200 runs per month was cited when this guide was first drafted (October 2026) but could not be confirmed on screen, so no monthly ceiling is claimed here | Observed on screen (Section 8.1) |
+| What counts as a run | Observed: every time a flow triggers, including runs that end in **No actions performed**. A step is one executed component: the trigger, each condition evaluated, and the action | Usage screen and audit log (Section 8.1) |
 | Custom fields | Up to 50 per space | Atlassian custom fields documentation |
 | Short text field | 255 characters | Atlassian fields reference |
-| Who can create automation rules | Space admins | Atlassian automation documentation |
+| Who can create automation flows | Space admins | Atlassian automation documentation |
 | Input file | `data/processed/triaged_feedback.csv` (Files 6 and 7 of this repository) | `README.md` Section 6.2 |
 
 **Fields to be created:** 18 custom fields (15 imported, 3 workspace-only), well under the limit of 50.
@@ -78,10 +78,10 @@
 [ STEP 6 ]  Build the four saved views                        (Section 7)
                 |
                 v
-[ STEP 7 ]  Build the two automation rules and test them      (Section 8)
+[ STEP 7 ]  Build the two automation flows and test them      (Section 8)
                 |
                 v
-[ STEP 8 ]  Capture screenshots into assets/
+[ STEP 8 ]  Capture screenshots into assets/                (Section 7, Section 8.1)
 ```
 
 **Step 1: create the space.** Create a new `Jira Product Discovery` space named `Release Telemetry Triage`. **[CONFIRM ON SCREEN]**: the space-creation menu offers templates; choose the option that gives a blank idea-management space. Note the term used by Atlassian is *space*, and work items are called *ideas*.
@@ -256,7 +256,7 @@ Create each view from **Views**, then **+ Create a view**.
 
 | ID | View Name | Type | Configuration |
 |:---|:---|:---|:---|
-| `VIEW-01` | `MATRIX · Severity × Reach` | Matrix | X axis = `Affected Users`; Y axis = `Layer Weight`. Use **About this view** to add the reading guide in 7.1. |
+| `VIEW-01` | `MATRIX · Severity × Reach` | Matrix | X axis = `Affected Users`; Y axis = `Layer Weight`; **Card colors** = `Priority Band`; **Card layout** = Detailed. Use **About this view** to add the reading guide in 7.1. |
 | `VIEW-02` | `QUEUES · Routing by Score` | List | Group by `Routing Queue`; sort by `Triage Score` descending, then `Affected Users` descending; visible fields in this order: `Summary`, `Priority Band`, `Triage Score`, `Affected Users`, `Root Cause Layer`, `Feature Tier`, `Funds At Risk`. |
 | `VIEW-03` | `PRD · Requirements Tracker` | List | Filter `Priority Band` is any of `P0_CRITICAL`, `P1_HIGH`; sort by `Triage Score` descending; visible fields: `Summary`, `Priority Band`, `Dedup Hash`, `PRD Link`, `PRD Status`. |
 | `VIEW-04` | `TRIAGE · Manual Review` | List | Filter `Routing Queue` = `Q0_MANUAL_REVIEW`; sort by `Affected Users` descending; visible fields: `Summary`, `Error Signature`, `Affected Users`, `Source Channels`. |
@@ -272,32 +272,68 @@ Create each view from **Views**, then **+ Create a view**.
 
 > ⚠️ **[OPERATIONAL SYSTEM TRAP]**: The matrix plots two raw fields; it does not draw the band thresholds and does not show the `Funds At Risk` override. Read the band from `Priority Band` in `VIEW-02`, not from bubble position.
 
-**Screenshots for `assets/`:** `VIEW-01` becomes `assets/jpd_matrix_view.png`; `VIEW-02` becomes `assets/jpd_list_view.png`.
+**Screenshots for `assets/`:** `VIEW-01` becomes `assets/jpd_matrix_view.png`; `VIEW-02` becomes `assets/jpd_list_view.png`. The automation audit log (Section 8.1) becomes `assets/jpd_automation_audit.png`.
+
+### 7.2 Behavior observed while building the views
+
+| Observation | Consequence |
+|:---|:---|
+| **Card colors** take their colors from the option colors set on the field (`Priority Band`): `P0_CRITICAL` red, `P1_HIGH` orange, `P2_MEDIUM` yellow, `P3_LOW` green | Set the option colors first (Section 7.3), then choose `Priority Band` under **Card colors** |
+| On the matrix, a dot has a grey fill and receives only a colored ring; the colored fill appears on the cards | Use the Detailed card layout so each dot carries a readable label |
+| Hovering over a card darkens its dot | Move the pointer away from the matrix before taking the screenshot |
+| An edited view shows a yellow **Save for everyone** and **Reset** bar until it is saved | All four views were saved; an unsaved edit is visible only to the person who made it |
+| The reading guide in **About this view** was entered as plain lines, not as the table in 7.1 | The meaning is the same; the table form is the reference |
+| The second sort key of `VIEW-02` and the sort of `VIEW-04` were confirmed by the sort arrows in the view settings only | With 8 ideas and distinct values on the first key, the tie-break order cannot be observed in the data |
+
+### 7.3 `Priority Band` option colors
+
+| Option | Color chosen in the field settings | Approximate value sampled from the screenshots | Text |
+|:---|:---|:---:|:---|
+| `P0_CRITICAL` | Red, 4th row of the color grid | `#C9372C` | White |
+| `P1_HIGH` | Orange, 4th row | `#BD5B00` | White |
+| `P2_MEDIUM` | Yellow, 2nd row | `#F5E989` | Dark |
+| `P3_LOW` | Green, 2nd row | `#BAF3DB` | Dark |
+
+The rule behind the choice: saturated colors mean act now (`P0_CRITICAL`, `P1_HIGH`); pale colors mean backlog (`P2_MEDIUM`, `P3_LOW`). The hex values were read off rendered tiles, so treat them as approximations; the color grid in the field settings is the source of truth.
 
 ---
 
-## 8. Automation Rules and Quota Budget
+## 8. Automation Flows and Observed Usage
 
-**Where:** space, then (…), then **Space settings**, then **Automation**, then **Rules**. Only space admins can create rules.
+**Where:** open the space, then **Space settings**, then **Automation**; the address of that page ends in `/ideas/settings/automation`. The run history is the audit log tab, at the address ending `/ideas/settings/automation#/tab/audit-log`. The button that starts a new automation is labeled **Create flow**; Atlassian's interface calls each automation a *flow*, so this guide does too. Only space admins can create flows.
 
-### 8.1 Run budget (planning ceilings, not measurements)
+### 8.1 Observed usage (measured in November 2026)
 
-| Consumer | Ceiling per Month | Basis |
+No usage budget is claimed. A ceiling of 200 runs per month was cited when this guide was first drafted, but the author could not confirm it on screen (Section 2). What was measured instead:
+
+| Reading | Value | Where |
 |:---|:---:|:---|
-| Imports | 0 | No rule fires on idea creation (Section 1, principle 2) |
-| Testing both rules | 15 | Each test run that performs an action counts |
-| `AUTO-01` | 20 | Manual re-banding to `P0_CRITICAL` only |
-| `AUTO-02` | 60 | One run per requirements page linked |
-| **Allocated** | **95** | |
-| **Unallocated headroom** | **105** | 200 minus 95 |
+| Runs after the four tests in Section 8.4 | 4 | Usage tab |
+| Steps after the four tests | 12 | Usage tab |
+| Credits | 0 | Usage tab (figures are labeled *Estimate*) |
+| Audit log at the end of the build | 7 runs, 20 steps in total: the four tests, plus three later runs (two No actions performed while restoring the test ideas, one Success from registering the real requirements page) | Audit log, **Automation steps** column |
+
+The **Automation steps** column of the audit log shows what a step is:
+
+| Flow | Outcome | Steps | Executed components |
+|:---|:---|:---:|:---|
+| `AUTO-01` | Success | 3 | Trigger, condition, action |
+| `AUTO-01` | No actions performed | 2 | Trigger, condition (failed) |
+| `AUTO-02` | Success | 4 | Trigger, two conditions, action |
+| `AUTO-02` | No actions performed | 2 or 3 | Trigger, then one or two conditions, depending on which condition stopped the run |
+
+Two consequences. A run that ends in **No actions performed** is still counted as a run, so placing the condition first does not make a non-matching change free; it only makes it cheaper (2 steps instead of 3). And because the import creates ideas before any flow exists, and no flow fires on idea creation (Section 1, principle 2), the import adds no runs.
+
+Timestamps in the audit log are shown in the viewer's local time and are therefore not quoted in this guide. The framed screenshot is `assets/jpd_automation_audit.png`.
 
 ### 8.2 `AUTO-01`: P0 escalation notice
 
 | Parameter | Value |
 |:---|:---|
 | Trigger | Field value changed, field `Priority Band` |
-| Condition (first, so non-matching changes cost nothing) | `Priority Band` equals `P0_CRITICAL` |
-| Action | Send an email to the engineering lead (a member of the space); if no email action is offered, use **Add comment** with the text `Escalated to P0_CRITICAL: route to the engineering lead queue immediately.` |
+| Condition | `Priority Band` equals `P0_CRITICAL` |
+| Action | **Add comment** with the text `Escalated to P0_CRITICAL: route to the engineering lead queue immediately.` The comment is posted by the account named **Automation for Jira**. No email action was configured |
+| Duplicate prevention | Off |
 | Fires on | Manual changes only |
 | Scope | This space only |
 
@@ -309,32 +345,35 @@ Create each view from **Views**, then **+ Create a view**.
 | Condition 1 | `PRD Link` is not empty |
 | Condition 2 | `PRD Status` is empty |
 | Action | Edit the idea: set `PRD Status` to `DRAFT` |
-| Loop check | The action edits `PRD Status`, not the trigger field, so the rule cannot retrigger itself |
+| Notifications | Default |
+| Loop check | The action edits `PRD Status`, not the trigger field, so the flow cannot retrigger itself |
+| Timing | The flow ran about two minutes after the change was made |
+| Display | The open idea panel did not update by itself; a page reload (F5) showed `DRAFT` |
 | Scope | This space only |
 
-Both rules: the trigger and action labels above are the standard automation-builder terms. **[CONFIRM ON SCREEN]**
+The `PRD Link` field shows the pasted `Confluence` address as a smart link (the page title, not the raw address).
 
-### 8.4 Rule test protocol
+### 8.4 Flow test protocol and results
 
-| Step | Action | Expected Result |
-|:---:|:---|:---|
-| 1 | Open the usage screen and record the current count | Baseline noted |
-| 2 | Change one idea's `Priority Band` to `P0_CRITICAL` | `AUTO-01` runs once; email or comment appears |
-| 3 | Change one idea's `Priority Band` to `P2_MEDIUM` | `AUTO-01` does not count as a run (condition fails before any action) |
-| 4 | Paste a `Confluence` page URL into one idea's `PRD Link` | `AUTO-02` runs once; `PRD Status` becomes `DRAFT` |
-| 5 | Edit the same `PRD Link` again | `AUTO-02` does not count (`PRD Status` is no longer empty) |
-| 6 | Reopen the usage screen | Count increased by exactly 2 |
-| 7 | Restore the test ideas' original values | Original data restored |
+All four tests were run once, in this order. Each expected result was observed.
 
-If the count rose by more than 2, an unexpected rule or trigger is active; disable rules until the count matches.
+| Test | Action | Expected | Observed (audit log) |
+|:---:|:---|:---|:---|
+| 1 | Change one idea's `Priority Band` to `P0_CRITICAL` | `AUTO-01` adds the comment | `AUTO-01` **Success**; comment by **Automation for Jira** |
+| 2 | Change one idea's `Priority Band` to a value other than `P0_CRITICAL` | `AUTO-01` does nothing | `AUTO-01` **No actions performed** |
+| 3 | Paste a `Confluence` page address into `PRD Link` of an idea whose `PRD Status` is empty | `PRD Status` becomes `DRAFT` | `AUTO-02` **Success**; `DRAFT` visible after a reload |
+| 4 | Edit the same `PRD Link` again | `AUTO-02` does nothing, because `PRD Status` is no longer empty | `AUTO-02` **No actions performed** |
+| 5 | Restore the test ideas | Original values back | Done; the test comment was deleted, and the idea that was given a real requirements page keeps its `PRD Link` and `DRAFT` status |
+
+After step 4 the usage tab read 4 runs, 12 steps, 0 credits. If a flow runs that was not triggered on purpose, disable it and check its trigger.
 
 ### 8.5 Deliberately not configured
 
 | Capability | Reason |
 |:---|:---|
-| Rule on idea creation | Would spend one run per imported idea |
+| Flow on idea creation | Would run once per imported idea |
 | Creating delivery tickets in a Jira software space | Requires a software space this repository does not use |
-| Scheduled sweeps | Consume runs without human input |
+| Scheduled sweeps | Run without human input |
 | API-based ingestion | Out of scope; ingestion is a `CSV` import |
 
 ---
@@ -363,8 +402,8 @@ If the count rose by more than 2, an unexpected rule or trigger is active; disab
 | 5 | Option lists unchanged after import (5, 3, 2, 4, and 3 options) | Yes | ☐ |
 | 6 | `IF-01` to `IF-05` | All pass | ☐ |
 | 7 | `VIEW-01` to `VIEW-04` exist | Yes | ☐ |
-| 8 | `AUTO-01` and `AUTO-02` tested | Count rose by exactly 2 | ☐ |
-| 9 | Screenshots saved to `assets/` | Two from this guide | ☐ |
+| 8 | `AUTO-01` and `AUTO-02` tested with one positive and one negative case each (Section 8.4) | Audit log shows Success, No actions performed, Success, No actions performed | ☐ |
+| 9 | Screenshots saved to `assets/` | Three from this guide: matrix, list, audit log | ☐ |
 
 ---
 
@@ -376,7 +415,13 @@ If the count rose by more than 2, an unexpected rule or trigger is active; disab
 
 > ⚠️ **[SELECT OPTION TRAP]**: Option matching is by text. A trailing space, lowercase letter, or misspelled option in Section 4.3 yields blank cells or duplicate options after import.
 
-> ⚠️ **[AUTOMATION QUOTA TRAP]**: The usage limit is per month and per product. Testing consumes real runs. The tests in Section 8.4 use at most 2.
+> ⚠️ **[AUTOMATION USAGE TRAP]**: The usage screen counts runs, steps, and credits, and labels them *Estimate*. A run that ends in **No actions performed** still counts. No monthly limit was visible on the Free-plan site used here, and the 200-run figure cited at first drafting could not be confirmed. Check the usage screen on your own plan before relying on any number.
+
+> ⚠️ **[FUNDS OVERRIDE ORDERING TRAP]**: `VIEW-02` sorts each queue by `Triage Score`, not by `Priority Band`. The idea with `Dedup Hash` `9fef700c305f` is `P0_CRITICAL` only through the `Funds At Risk` override and has a score of 5, so inside `Q1_BACKEND_PLATFORM` it sorts last, below a `P2_MEDIUM` idea with score 6. Read the band column, not the row position.
+
+> ⚠️ **[SMALL SAMPLE LIMITATION]**: The integrity filters in Section 6.3 were run on 8 ideas. Zero results on 8 rows show the import mapping is consistent; they are weak evidence that the filters would catch errors at scale.
+
+> ⚠️ **[DELAYED FLOW TRAP]**: `AUTO-02` ran about two minutes after the change, and the open idea panel did not refresh itself. A screenshot or a test taken immediately will show an empty `PRD Status`; wait, then reload.
 
 > ⚠️ **[LOGIN WALL]**: The workspace is not publicly visible. The screenshots in `assets/` are the public evidence.
 

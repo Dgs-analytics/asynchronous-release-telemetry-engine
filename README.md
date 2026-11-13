@@ -1,14 +1,40 @@
 # `asynchronous-release-telemetry-engine`
 
-> An automated upstream Product Operations pipeline configured to parse unstructured user feedback anomalies and govern technical developer backlog prioritization metrics asynchronously.
+![Python 3.13](https://img.shields.io/badge/Python-3.13-44546F?logo=python&logoColor=white) ![Jira Product Discovery](https://img.shields.io/badge/Jira_Product_Discovery-configured-0052CC?logo=jira&logoColor=white) ![Confluence](https://img.shields.io/badge/Confluence-PRD_template-0052CC?logo=confluence&logoColor=white) ![Data](https://img.shields.io/badge/data-100%25_synthetic-44546F) ![License](https://img.shields.io/badge/license-MIT-44546F)
 
-`Product Operations` · `Root-Cause Anomaly Triage` · `Requirement Synthesis` · `Taxonomy Design` · `Jira Product Discovery` · `Confluence` · `JSON` · `CSV` · `Python 3.13` · `Markdown`
+> An automated upstream Product Operations pipeline configured to parse unstructured user feedback anomalies and govern technical developer backlog prioritization metrics asynchronously.
 
 ---
 
 > 🧪 **[SYNTHETIC DATA NOTICE]**: Every record in `data/raw/feedback_export_sample.json` is fabricated for demonstration. The platform, users, incident, and error messages do not exist. Nothing in this repository represents a real production system, a real client, or measured business results.
 
 > 🧭 **[SCOPE BOUNDARY]**: This is a systems-architecture and documentation repository. The single `Python` script (`src/triage_parser.py`) is a minimal ingestion vehicle: it flattens, deduplicates, and classifies a static `JSON` export before the data enters `Jira Product Discovery`. It is not an application, a service, or a data-engineering pipeline.
+
+---
+
+## Start Here
+
+| If you want to | Go to |
+|:---|:---|
+| See the finished build | [10. Evidence Artifacts](#10-evidence-artifacts) |
+| Understand the design | [2. The Operational Problem](#2-the-operational-problem), [3. System Architecture](#3-system-architecture), [5. Taxonomy Execution Layer](#5-taxonomy-execution-layer) |
+| Run the parser yourself | [8. Reproduce Locally](#8-reproduce-locally) |
+| Rebuild the two workspaces | [9. Workspace Configuration Guides](#9-workspace-configuration-guides) |
+
+**Result at a glance** (from the parser run and the workspace tests in Section 10):
+
+| Measure | Value |
+|:---|:---:|
+| Feedback records ingested | 34 |
+| Unique faults after deduplication | 8 |
+| Duplicate reports collapsed | 26 |
+| Ideas per band (`P0_CRITICAL` / `P1_HIGH` / `P2_MEDIUM` / `P3_LOW`) | 2 / 2 / 2 / 2 |
+| Ideas held for manual review (`Q0_MANUAL_REVIEW`) | 1 |
+| Saved views in `Jira Product Discovery` | 4 |
+| Automation flows, each tested with one positive and one negative case | 2 |
+| `Confluence` requirements pages built (of the 4 `P0_CRITICAL` and `P1_HIGH` ideas that qualify) | 1 |
+
+> ⚠️ **[CONSTRUCTED DISTRIBUTION]**: The 2 / 2 / 2 / 2 band split exists because the author wrote the 34 reports to exercise every band. It is a design check of the pipeline, not a finding about real feedback.
 
 ---
 
@@ -31,17 +57,11 @@
 
 ## 1. Executive Summary
 
-| Attribute | Detail |
-|:---|:---|
-| **Repository** | `asynchronous-release-telemetry-engine` |
-| **Domain** | Upstream Product Operations: release telemetry and developer-backlog governance |
-| **Core Problem** | After a major release, unstructured complaints scatter across channels, and engineering effort follows the loudest report instead of the most severe root cause |
-| **Core Mechanism** | Flatten chaotic `JSON` exports into a unified `CSV`, collapse duplicate reports with `SHA-256` signatures, classify by root-cause layer, score by severity and reach, then route into a prioritization matrix in `Jira Product Discovery` |
-| **Technique Demonstrated** | Root-Cause Anomaly Triage |
-| **Skill Demonstrated** | Requirement Synthesis & Taxonomy Design |
-| **Primary Deliverables** | System documentation, a `Confluence` requirements template, exact `Jira Product Discovery` configuration rules, a data contract, and a light `Python` parser |
-| **Execution Model** | Asynchronous: no live triage meeting is required; the pipeline yields a ranked queue that engineering consumes on its own schedule |
-| **Data** | 100% synthetic |
+After a release, complaints arrive through `Slack`, email, and a support form in three different shapes, and the same fault is reported many times in different words. This repository shows one way to turn that pile into a ranked backlog.
+
+A small `Python` script flattens the exports, collapses duplicate reports, scores each fault by severity and reach, and writes a `CSV`. The `CSV` is imported into `Jira Product Discovery`, where a matrix view and routing queues put the most severe faults first. `Confluence` holds a requirements page for the faults that qualify.
+
+The project is documentation first: the script is the ingestion step, not the product. "Asynchronous" means no live triage meeting is needed, because engineering reads the ranked queue on its own schedule. All data is synthetic.
 
 ---
 
@@ -62,64 +82,38 @@ A Web3 platform ships a major smart-contract update. Within hours, transaction-e
 
 The architecture is a vertical sequence. Each stage has one owner type: the `Python` script, a platform configuration, or the analyst.
 
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 700, "nodeSpacing": 30, "rankSpacing": 40, "padding": 14}, "themeVariables": {"fontSize": "16px"}}}%%
+flowchart TD
+    S1["<b>STAGE 1 · RAW INTAKE</b><br/>Slack, email and support-form exports<br/>Nested JSON, three record shapes"]
+    S2["<b>STAGE 2 · FLATTEN</b><br/>Map each channel shape to one unified record<br/>Normalize all timestamps to ISO 8601 UTC"]
+    S3["<b>STAGE 3 · NORMALIZE ERROR SIGNATURE</b><br/>Lowercase; strip hashes, addresses, amounts, UUIDs, timestamps<br/>Keep the first fault statement of 3+ words; strip punctuation"]
+    S4["<b>STAGE 4 · DEDUPLICATE</b><br/>SHA-256 of the normalized signature gives dedup_hash<br/>Collapse matches; count occurrences and distinct reporters"]
+    S5["<b>STAGE 5 · CLASSIFY</b><br/>Assign root_cause_layer and feature_tier; flag funds_at_risk<br/>No rule match: UNCLASSIFIED"]
+    S6["<b>STAGE 6 · SCORE AND ROUTE</b><br/>triage_score = layer_weight x reach_factor<br/>Assign priority_band and routing_queue"]
+    S7["<b>STAGE 7 · EMIT</b><br/>data/processed/triaged_feedback.csv"]
+    S8["<b>STAGE 8 · IMPORT INTO JIRA PRODUCT DISCOVERY</b><br/>CSV import wizard maps the custom fields"]
+    S9["<b>STAGE 9 · PRIORITIZATION MATRIX</b><br/>Matrix view, list views, two automation flows<br/>docs/JPD_ROUTING_MATRIX.md"]
+    S10["<b>STAGE 10 · REQUIREMENT SYNTHESIS</b><br/>P0 and P1 ideas receive a Confluence PRD page<br/>docs/CONFLUENCE_PRD_TEMPLATE.md"]
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10
+    classDef source fill:#EBECF0,stroke:#44546F,color:#172B4D
+    classDef script fill:#DEEBFF,stroke:#0052CC,color:#172B4D
+    classDef manual fill:#FFFFFF,stroke:#C9372C,stroke-width:2px,color:#172B4D
+    classDef platform fill:#0052CC,stroke:#0052CC,color:#FFFFFF
+    class S1 source
+    class S2,S3,S4,S5,S6,S7 script
+    class S8,S10 manual
+    class S9 platform
 ```
-[ STAGE 1 ]  RAW INTAKE
-             Three channel exports (Slack, email, support form)
-             Format: nested JSON, three different record shapes
-                 |
-                 v
-[ STAGE 2 ]  FLATTEN
-             Map each channel shape to one unified record
-             Normalize all timestamps to ISO 8601 UTC
-                 |
-                 v
-[ STAGE 3 ]  NORMALIZE ERROR SIGNATURE
-             Lowercase; strip transaction hashes, wallet addresses,
-             amounts, UUIDs, timestamps; keep the first fault
-             statement of 3+ words; strip punctuation
-                 |
-                 v
-[ STAGE 4 ]  DEDUPLICATE
-             SHA-256 digest of the normalized signature -> dedup_hash
-             Collapse matching records; count occurrences and
-             distinct reporters
-                 |
-                 v
-[ STAGE 5 ]  CLASSIFY
-             Assign root_cause_layer and feature_tier
-             Flag funds_at_risk
-             No rule match -> UNCLASSIFIED
-                 |
-                 v
-[ STAGE 6 ]  SCORE AND ROUTE
-             triage_score = layer_weight x reach_factor
-             Assign priority_band and routing_queue
-                 |
-                 v
-[ STAGE 7 ]  EMIT
-             data/processed/triaged_feedback.csv
-                 |
-                 v
-[ STAGE 8 ]  IMPORT INTO JIRA PRODUCT DISCOVERY
-             CSV import wizard -> custom fields mapped
-                 |
-                 v
-[ STAGE 9 ]  PRIORITIZATION MATRIX
-             Matrix view, list views, and automation rules
-             (exact configuration: docs/JPD_ROUTING_MATRIX.md)
-                 |
-                 v
-[ STAGE 10 ] REQUIREMENT SYNTHESIS
-             P0 and P1 ideas receive a Confluence PRD page
-             (template: docs/CONFLUENCE_PRD_TEMPLATE.md)
-```
+
+Color key: grey is the source, light blue is the `Python` script, blue is the configured platform, and a red outline marks a manual analyst step.
 
 | Stage | Owner | Automation Level |
 |:---|:---|:---|
 | 1 | Source systems | Exports are static files in this repository |
 | 2 – 7 | `Python` script | Fully automated per run |
 | 8 | Analyst | **Manual**: `CSV` import wizard |
-| 9 | `Jira Product Discovery` | Configured once; automation rules apply within plan quota |
+| 9 | `Jira Product Discovery` | Configured once; two automation flows react to manual edits (`docs/JPD_ROUTING_MATRIX.md`, Section 8) |
 | 10 | Analyst | **Manual**: authored from the template |
 
 > ⚠️ **[OPERATIONAL SYSTEM TRAP]**: "Asynchronous" in this repository means decoupled from live meetings. It does not mean real-time streaming. Ingestion is a `CSV` import step; no API-based ingestion is configured here.
@@ -130,14 +124,14 @@ The architecture is a vertical sequence. Each stage has one owner type: the `Pyt
 
 | Tool | Role in This Repository | Cost Tier | Repository Touchpoint |
 |:---|:---|:---|:---|
-| `Jira Product Discovery` | Prioritization workspace, matrix view, routing queues | Free plan (3 creators; 200 automation rule runs per month at time of writing, October 2026) | `docs/JPD_ROUTING_MATRIX.md` |
-| `Confluence` | Requirements wiki for user-story requirement matrices | Free plan | `docs/CONFLUENCE_PRD_TEMPLATE.md` |
+| `Jira Product Discovery` | Prioritization workspace, matrix view, routing queues, two automation flows | Free plan (3 creators) | `docs/JPD_ROUTING_MATRIX.md` |
+| `Confluence` | Requirements wiki for user-story requirement matrices | Free plan (space `Release Telemetry PRDs`, key `RTP`) | `docs/CONFLUENCE_PRD_TEMPLATE.md` |
 | `JSON` | Raw, nested feedback export (input format) | n/a | `data/raw/feedback_export_sample.json` |
 | `CSV` | Flat triaged output and `Jira Product Discovery` import format | n/a | `data/processed/triaged_feedback.csv` |
 | `Python (Light log parsing logic)` | Flatten, normalize, deduplicate, classify, score | Open source | `src/triage_parser.py` |
 | `Markdown` | Documentation format for all specifications | n/a | all `.md` files |
 
-**Python dependencies:** none beyond the standard library (`json`, `csv`, `hashlib`, `re`, `argparse`, `datetime`). The input is `JSON`, so no HTML scraping and no HTTP calls are needed.
+**Python dependencies:** none beyond the standard library (`json`, `csv`, `hashlib`, `re`, `argparse`, `datetime`). The input is `JSON`, so no HTML scraping and no HTTP calls are needed. `src/triage_parser.py` is a single file of about 660 lines, including input validation and output checks.
 
 **Authoring environment:**
 
@@ -168,7 +162,7 @@ The architecture is a vertical sequence. Each stage has one owner type: the `Pyt
 |:---|:---|:---|
 | Design a closed vocabulary | Five root-cause layers, three feature tiers, four priority bands, three routing queues | Section 5.3 |
 | Translate complaints into requirements | Raw user text rewritten as user stories with acceptance criteria | `docs/CONFLUENCE_PRD_TEMPLATE.md` |
-| Make the taxonomy operable | Every enum maps to a `Jira Product Discovery` field, view, or automation rule | `docs/JPD_ROUTING_MATRIX.md` |
+| Make the taxonomy operable | Every enum maps to a `Jira Product Discovery` field, view, or automation flow | `docs/JPD_ROUTING_MATRIX.md` |
 | Keep one source of truth | The tables below define the contract; supporting documents extend it and never override it | This section |
 
 ### 5.3 Canonical Taxonomy Reference
@@ -206,7 +200,7 @@ The architecture is a vertical sequence. Each stage has one owner type: the `Pyt
 | `P2_MEDIUM` | `triage_score` 4 – 9 | Groomed backlog |
 | `P3_LOW` | `triage_score` 1 – 3 | Batched or iceboxed |
 
-> ⚠️ **[OPERATIONAL SYSTEM TRAP]**: `funds_at_risk` overrides the score. Without the override, a single-reporter report of a double-charged transaction would score 5 and land in `P2_MEDIUM`.
+> ⚠️ **[OPERATIONAL SYSTEM TRAP]**: `funds_at_risk` overrides the score. Without the override, a single-reporter report of a double-charged transaction would score 5 and land in `P2_MEDIUM`. The side effect: queues are sorted by `triage_score`, so that `P0_CRITICAL` idea (`9fef700c305f`, score 5) sorts last in `Q1_BACKEND_PLATFORM`, below a `P2_MEDIUM` idea with score 6. Read the `priority_band` column, not the row position (`docs/JPD_ROUTING_MATRIX.md`, Section 11).
 
 **Routing queues**
 
@@ -288,11 +282,13 @@ A missing input file or an unwritable output path exits with code 1.
 ```
 asynchronous-release-telemetry-engine/
 |-- README.md
+|-- LICENSE
 |-- .gitattributes
 |-- .gitignore
 |-- assets/
 |   |-- jpd_matrix_view.png
 |   |-- jpd_list_view.png
+|   |-- jpd_automation_audit.png
 |   |-- confluence_prd_page.png
 |   `-- parser_run.png
 |-- data/
@@ -310,10 +306,11 @@ asynchronous-release-telemetry-engine/
 
 | Path | Purpose |
 |:---|:---|
+| `LICENSE` | `MIT` licence covering the documentation, the parser, and the synthetic data |
 | `.gitattributes` | Forces `LF` line endings and marks screenshots as binary, so the checked-in `CSV` stays byte-identical on every platform |
 | `.gitignore` | Keeps local noise out and allow-lists the files in `data/` and `assets/` |
 | `docs/CONFLUENCE_PRD_TEMPLATE.md` | Structured product requirements page for P0 and P1 items |
-| `docs/JPD_ROUTING_MATRIX.md` | Exact field, view, and automation configuration for the routing dashboard |
+| `docs/JPD_ROUTING_MATRIX.md` | Exact field, view, and automation configuration for the routing dashboard, with the behavior observed while building it |
 | `docs/TAXONOMY_EXECUTION_LAYER.md` | Worked triage examples for the technique and the skill |
 | `data/raw/` | Synthetic input |
 | `data/processed/` | Parser output and `Jira Product Discovery` import file |
@@ -344,7 +341,20 @@ python src/triage_parser.py --input data/raw/feedback_export_sample.json --outpu
 
 Running `python src/triage_parser.py` with no arguments uses the same two paths as defaults.
 
-**Step 4.** Confirm the output: `data/processed/triaged_feedback.csv` exists, has the 16 columns listed in Section 6.2, and the console summary reports records ingested, unique signatures, duplicates collapsed, and the distribution across priority bands.
+**Step 4.** Confirm the output: `data/processed/triaged_feedback.csv` exists, has the 16 columns listed in Section 6.2, and the console summary reads exactly as follows (on Windows the last line prints the path with backslashes):
+
+```
+Validation passed     : schema_version 1.0; total_records 34 and channel counts (slack=16 email=10 support_form=8) match the payload
+Records ingested      : 34
+Unique signatures     : 8
+Duplicates collapsed  : 26
+Band distribution     : P0_CRITICAL=2 P1_HIGH=2 P2_MEDIUM=2 P3_LOW=2
+Manual review queue   : 1
+Output contract       : 9 of 9 checks passed (in memory and after re-reading the written file)
+Rows written          : 8 -> data/processed/triaged_feedback.csv
+```
+
+The run is deterministic: re-running it on the sample reproduces the committed `CSV` byte for byte. A screenshot of the run is in Section 10.
 
 **Step 5.** Continue in the platforms using the guides in Section 9.
 
@@ -354,7 +364,7 @@ Running `python src/triage_parser.py` with no arguments uses the same two paths 
 
 | Order | Platform | Task | Guide |
 |:---:|:---|:---|:---|
-| 1 | `Jira Product Discovery` | Create fields, import the `CSV`, build the matrix view, add automation rules | `docs/JPD_ROUTING_MATRIX.md` |
+| 1 | `Jira Product Discovery` | Create fields, import the `CSV`, build the four saved views, add and test two automation flows | `docs/JPD_ROUTING_MATRIX.md` |
 | 2 | `Confluence` | Create the requirements page for each `P0_CRITICAL` and `P1_HIGH` idea | `docs/CONFLUENCE_PRD_TEMPLATE.md` |
 | 3 | Either | Walk through worked triage examples | `docs/TAXONOMY_EXECUTION_LAYER.md` |
 
@@ -362,14 +372,47 @@ Running `python src/triage_parser.py` with no arguments uses the same two paths 
 
 ## 10. Evidence Artifacts
 
-The configured workspaces sit behind a login, so screenshots are the public proof of the build.
+The configured workspaces sit behind a login, so the screenshots below are the public proof of the build. Click any image to open it at full size.
 
 | Artifact | File | Shows |
 |:---|:---|:---|
-| Prioritization matrix | `assets/jpd_matrix_view.png` | The `Jira Product Discovery` matrix view of imported ideas |
-| Routing list | `assets/jpd_list_view.png` | Ideas grouped by `routing_queue` and sorted by `triage_score` |
-| Requirements page | `assets/confluence_prd_page.png` | A completed `Confluence` requirements page |
+| Prioritization matrix | `assets/jpd_matrix_view.png` | `VIEW-01`: the 8 imported ideas plotted by `Affected Users` and `Layer Weight`, cards colored by `Priority Band` |
+| Routing list | `assets/jpd_list_view.png` | `VIEW-02`: ideas grouped by `Routing Queue` and sorted by `Triage Score` |
+| Automation history | `assets/jpd_automation_audit.png` | Runs of `AUTO-01` and `AUTO-02` with outcome and step count |
+| Requirements page | `assets/confluence_prd_page.png` | The top of the `Confluence` requirements page for Triage ID `6af2c983b0fc` |
 | Parser run | `assets/parser_run.png` | Terminal output of Step 3 in Section 8 |
+
+### 10.1 Prioritization matrix
+
+[![Matrix view of the eight imported ideas, plotted by affected users and layer weight, colored by priority band](assets/jpd_matrix_view.png)](assets/jpd_matrix_view.png)
+
+*`VIEW-01` in `Jira Product Discovery`. Horizontal axis: `Affected Users`; vertical axis: `Layer Weight`. Red and orange cards are `P0_CRITICAL` and `P1_HIGH`; yellow and green are `P2_MEDIUM` and `P3_LOW`.*
+
+> ⚠️ **[OPERATIONAL SYSTEM TRAP]**: The matrix plots two raw fields. It does not draw band thresholds and does not show the `funds_at_risk` override, so read the band from the card color or from `VIEW-02`.
+
+### 10.2 Routing list
+
+[![List view grouped by routing queue and sorted by triage score](assets/jpd_list_view.png)](assets/jpd_list_view.png)
+
+*`VIEW-02`: `Q1_BACKEND_PLATFORM`, `Q2_FRONTEND_EXPERIENCE`, and `Q0_MANUAL_REVIEW`, each sorted by `Triage Score` descending. The `P0_CRITICAL` idea with score 5 sits at the bottom of `Q1_BACKEND_PLATFORM` because of the `funds_at_risk` override (Section 5.3).*
+
+### 10.3 Automation history
+
+[![Automation audit log showing runs of AUTO-01 and AUTO-02 with outcome and automation steps](assets/jpd_automation_audit.png)](assets/jpd_automation_audit.png)
+
+*The audit log of the space: configuration changes and the runs of `AUTO-01` and `AUTO-02`. Each flow was tested with one positive case (outcome Success) and one negative case (outcome No actions performed). The **Automation steps** column shows that a step is one executed component: trigger, each condition evaluated, and the action (`docs/JPD_ROUTING_MATRIX.md`, Section 8). Seven runs are visible in total: the four tests, plus three later runs (two No actions performed, made while restoring the test ideas, and one Success from registering the real requirements page for `6af2c983b0fc`).*
+
+### 10.4 Requirements page
+
+[![Top of the Confluence requirements page: purpose notice and the page properties table](assets/confluence_prd_page.png)](assets/confluence_prd_page.png)
+
+*The requirements page `PRD · 6af2c983b0fc · Balance not updating after confirmed transfer`: the title, the two opening notices, and the first rows of Section C1 (Page Properties). The full page has 13 sections, reproduced as Part C of `docs/CONFLUENCE_PRD_TEMPLATE.md`.*
+
+### 10.5 Parser run
+
+[![Terminal output of the parser: 34 records ingested, 8 unique signatures, 26 duplicates collapsed, 9 of 9 contract checks passed](assets/parser_run.png)](assets/parser_run.png)
+
+*The command from Section 8, Step 3, and its console summary, run on `Python 3.13`.*
 
 ---
 
@@ -379,7 +422,11 @@ The configured workspaces sit behind a login, so screenshots are the public proo
 
 > ⚠️ **[DEDUPLICATION BOUNDARY]**: Deduplication is exact-match on the normalized signature. Two reports describing the same fault in different words will not merge. The `dedup_hash` is truncated to 12 hex characters (48 bits); collision risk is negligible at this volume but is not zero.
 
-> ⚠️ **[AUTOMATION QUOTA TRAP]**: The `Jira Product Discovery` Free plan limits automation to 200 rule runs per month. Field values arrive through the `CSV` import, not through automation, so no rule fires on idea creation; the quota is reserved for escalation notices and requirements-page registration (`docs/JPD_ROUTING_MATRIX.md`, Section 8).
+> ⚠️ **[AUTOMATION USAGE TRAP]**: The `Jira Product Discovery` usage screen counts runs, steps, and credits, and labels them as estimates. A run that ends in No actions performed still counts, and the author could not confirm a monthly limit on screen, so none is claimed. Field values arrive through the `CSV` import, not through automation, so no flow fires on idea creation (`docs/JPD_ROUTING_MATRIX.md`, Section 8).
+
+> ⚠️ **[CIRCULARITY LIMITATION]**: The sample reports, the classification phrases, and the weights share one author, so the results show the pipeline is consistent, not that it is accurate (`docs/TAXONOMY_EXECUTION_LAYER.md`).
+
+> ⚠️ **[PRIVATE WORKSPACE]**: The `Jira Product Discovery` space and the `Confluence` space are not publicly accessible. Section 10 shows what they contain; a reader cannot open them.
 
 > ⚠️ **[IMPORT DUPLICATION TRAP]**: The `Jira Product Discovery` `CSV` import creates ideas; this repository assumes it does not update existing ones by `dedup_hash`. Import each export once, into an empty space. A second import into a populated space can create duplicate ideas. If a trial import fails its checks, delete every imported idea before importing again (`docs/JPD_ROUTING_MATRIX.md`, Section 5.3).
 
@@ -398,4 +445,5 @@ The configured workspaces sit behind a login, so screenshots are the public proo
 | Taxonomy design | Closed enums with a single canonical specification |
 | Requirements documentation | `Confluence` requirements template with user stories and acceptance criteria |
 | Process design | Staged architecture with explicit owners and automation levels |
+| Workflow automation | Two `Jira Product Discovery` flows, each tested with a positive and a negative case, with the audit log as evidence |
 | Data hygiene | Timestamp normalization, deduplication, privacy boundary |

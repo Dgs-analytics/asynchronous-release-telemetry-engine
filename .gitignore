@@ -85,7 +85,7 @@ data/processed/*
 
 # -----------------------------------------------------------------------------
 # 7. EVIDENCE GUARD (`README.md` Section 10)
-#    Only the four named screenshots are tracked. Screenshots of
+#    Only the five named screenshots are tracked. Screenshots of
 #    `Jira Product Discovery` and `Confluence` can show account names, email
 #    addresses, and site addresses. Redact them, name them exactly as below,
 #    and the allow-list will pick them up.
@@ -95,6 +95,7 @@ assets/*
 !assets/jpd_list_view.png
 !assets/confluence_prd_page.png
 !assets/parser_run.png
+!assets/jpd_automation_audit.png
 
 
 # -----------------------------------------------------------------------------

@@ -78,11 +78,11 @@
 
 ## A4. Building the Page in `Confluence`
 
-**Step 1. Preview the template as rendered text.** In `VS Code`, open this file and press Ctrl+Shift+V to open the `Markdown` preview. Select and copy the rendered content of Part B, not the raw source.
+**Step 1. Render the content as formatted text.** Copy from formatted text, never from raw `Markdown`. The worked example in Part C was built from a rendered HTML copy of this file opened in `Chrome`. The `VS Code` `Markdown` preview (open this file and press Ctrl+Shift+V) produces the same kind of formatted text; that route was not tested. Select from the first line of the page content (the title) to the last line of the last section, so that no leading or trailing line is left out.
 
-**Step 2. Paste into a new `Confluence` page.** Paste into the page editor. Community reports on how `Confluence` Cloud handles pasted raw `Markdown` conflict: some describe automatic conversion, others describe the text landing in a code block. Pasting rendered text avoids that variable.
+**Step 2. Paste into a new `Confluence` page.** Create the page in a space (the example used a space named `Release Telemetry PRDs`, key `RTP`, on the `Confluence` Free plan), type the page title in the title field, and paste the formatted text into the body. Pasting formatted HTML kept every table as a table. Community reports on how `Confluence` Cloud handles pasted raw `Markdown` conflict: some describe automatic conversion, others describe the text landing in a code block. Pasting formatted text avoids that variable.
 
-**Step 3. Verify the paste.** Check that every table kept its header row and that headings kept their levels. Fix by hand if not.
+**Step 3. Verify the paste.** Check that every table kept its header row, that headings kept their levels, and that the first and last lines of the content are present. One difference was observed on the example page: a table cell that begins with `1.` (the verification steps in C4) was converted by `Confluence` into a one-item numbered list. The words are unchanged; fix it by hand if the layout matters.
 
 **Step 4. Add native elements.** `Markdown` cannot express these, so add them in the editor:
 
@@ -94,7 +94,7 @@
 
 **Step 5. Name the page** using the convention in B1, for example `PRD · 6af2c983b0fc · Balance not updating after confirmed transfer`.
 
-**Step 6. Link the page to its idea.** Paste the page URL into the matching `Jira Product Discovery` idea. Atlassian documents linking `Confluence` pages to ideas; if the idea view offers a dedicated link option, use it, and in every case also place the URL in the idea description so the link survives any interface change.
+**Step 6. Link the page to its idea.** Paste the page address into the `PRD Link` field of the matching `Jira Product Discovery` idea (field defined in `docs/JPD_ROUTING_MATRIX.md`, Section 4.2). The field displays the page as a smart link, and the change triggers `AUTO-02`, which sets `PRD Status` to `DRAFT` about two minutes later (`docs/JPD_ROUTING_MATRIX.md`, Section 8.3). The address is not duplicated in the idea description.
 
 **Step 7. Reuse.** For the next fault, copy the finished page (page menu, Copy) rather than re-pasting the template, then replace the values.
 
@@ -306,7 +306,7 @@
 | Affected Users | `11` |
 | Product Operations Owner | Product Operations Analyst |
 | Engineering Owner | Backend Platform Lead |
-| `Jira Product Discovery` Idea | Linked from the idea description |
+| `Jira Product Discovery` Idea | Linked through the `PRD Link` field of the idea |
 | Page Version | 1.0 |
 | Last Updated | 2026-09-15 |
 
