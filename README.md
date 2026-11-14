@@ -18,6 +18,7 @@
 |:---|:---|
 | See the finished build | [10. Evidence Artifacts](#10-evidence-artifacts) |
 | Understand the design | [2. The Operational Problem](#2-the-operational-problem), [3. System Architecture](#3-system-architecture), [5. Taxonomy Execution Layer](#5-taxonomy-execution-layer) |
+| Read the analysis of the output | `docs/FINDINGS_AND_RECOMMENDATIONS.md` |
 | Run the parser yourself | [8. Reproduce Locally](#8-reproduce-locally) |
 | Rebuild the two workspaces | [9. Workspace Configuration Guides](#9-workspace-configuration-guides) |
 
@@ -59,7 +60,7 @@
 
 After a release, complaints arrive through `Slack`, email, and a support form in three different shapes, and the same fault is reported many times in different words. This repository shows one way to turn that pile into a ranked backlog.
 
-A small `Python` script flattens the exports, collapses duplicate reports, scores each fault by severity and reach, and writes a `CSV`. The `CSV` is imported into `Jira Product Discovery`, where a matrix view and routing queues put the most severe faults first. `Confluence` holds a requirements page for the faults that qualify.
+A small `Python` script flattens the exports, collapses duplicate reports, scores each fault by severity and reach, and writes a `CSV`. The `CSV` is imported into `Jira Product Discovery`, where a matrix view and routing queues put the most severe faults first. `Confluence` holds a requirements page for the faults that qualify. `docs/FINDINGS_AND_RECOMMENDATIONS.md` records what the output shows and where the scoring is fragile.
 
 The project is documentation first: the script is the ingestion step, not the product. "Asynchronous" means no live triage meeting is needed, because engineering reads the ranked queue on its own schedule. All data is synthetic.
 
@@ -298,6 +299,7 @@ asynchronous-release-telemetry-engine/
 |       `-- triaged_feedback.csv
 |-- docs/
 |   |-- CONFLUENCE_PRD_TEMPLATE.md
+|   |-- FINDINGS_AND_RECOMMENDATIONS.md
 |   |-- JPD_ROUTING_MATRIX.md
 |   `-- TAXONOMY_EXECUTION_LAYER.md
 `-- src/
@@ -312,6 +314,7 @@ asynchronous-release-telemetry-engine/
 | `docs/CONFLUENCE_PRD_TEMPLATE.md` | Structured product requirements page for P0 and P1 items |
 | `docs/JPD_ROUTING_MATRIX.md` | Exact field, view, and automation configuration for the routing dashboard, with the behavior observed while building it |
 | `docs/TAXONOMY_EXECUTION_LAYER.md` | Worked triage examples for the technique and the skill |
+| `docs/FINDINGS_AND_RECOMMENDATIONS.md` | Findings computed from the output: where report volume fails, how sensitive the bands are, and what to change before real use |
 | `data/raw/` | Synthetic input |
 | `data/processed/` | Parser output and `Jira Product Discovery` import file |
 | `src/` | The only executable file |
@@ -367,6 +370,7 @@ The run is deterministic: re-running it on the sample reproduces the committed `
 | 1 | `Jira Product Discovery` | Create fields, import the `CSV`, build the four saved views, add and test two automation flows | `docs/JPD_ROUTING_MATRIX.md` |
 | 2 | `Confluence` | Create the requirements page for each `P0_CRITICAL` and `P1_HIGH` idea | `docs/CONFLUENCE_PRD_TEMPLATE.md` |
 | 3 | Either | Walk through worked triage examples | `docs/TAXONOMY_EXECUTION_LAYER.md` |
+| 4 | Either | Read the findings and the design critique | `docs/FINDINGS_AND_RECOMMENDATIONS.md` |
 
 ---
 
@@ -425,6 +429,8 @@ The configured workspaces sit behind a login, so the screenshots below are the p
 > ⚠️ **[AUTOMATION USAGE TRAP]**: The `Jira Product Discovery` usage screen counts runs, steps, and credits, and labels them as estimates. A run that ends in No actions performed still counts, and the author could not confirm a monthly limit on screen, so none is claimed. Field values arrive through the `CSV` import, not through automation, so no flow fires on idea creation (`docs/JPD_ROUTING_MATRIX.md`, Section 8).
 
 > ⚠️ **[CIRCULARITY LIMITATION]**: The sample reports, the classification phrases, and the weights share one author, so the results show the pipeline is consistent, not that it is accurate (`docs/TAXONOMY_EXECUTION_LAYER.md`).
+
+> ⚠️ **[TIME-BLINDNESS LIMITATION]**: The score reads a running total of distinct reporters. It ignores how fast a fault is growing and whether it has stopped. In the sample, the most reported fault took 20 hours 38 minutes to reach `P0_CRITICAL` (`docs/FINDINGS_AND_RECOMMENDATIONS.md`, Section 6).
 
 > ⚠️ **[PRIVATE WORKSPACE]**: The `Jira Product Discovery` space and the `Confluence` space are not publicly accessible. Section 10 shows what they contain; a reader cannot open them.
 
