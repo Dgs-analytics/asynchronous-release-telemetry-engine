@@ -18,7 +18,7 @@
 |:---|:---|
 | See the finished build | [10. Evidence Artifacts](#10-evidence-artifacts) |
 | Understand the design | [2. The Operational Problem](#2-the-operational-problem), [3. System Architecture](#3-system-architecture), [5. Taxonomy Execution Layer](#5-taxonomy-execution-layer) |
-| Read the analysis of the output | `docs/FINDINGS_AND_RECOMMENDATIONS.md` |
+| Read the analysis of the output | [`docs/FINDINGS_AND_RECOMMENDATIONS.md`](docs/FINDINGS_AND_RECOMMENDATIONS.md) |
 | Run the parser yourself | [8. Reproduce Locally](#8-reproduce-locally) |
 | Rebuild the two workspaces | [9. Workspace Configuration Guides](#9-workspace-configuration-guides) |
 
